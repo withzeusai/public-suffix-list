@@ -92,7 +92,7 @@ func TestParse(t *testing.T) {
 			}
 		}
 	})
-	t.Logf("checked %d test vectors", numVectors)
+	t.Logf("checked %d test vectors for Unicode %s", numVectors, idna.UnicodeVersion)
 
 	// Sanity check to make sure the parser didn't just silently skip
 	//  all test inputs. Manual inspection of the Unicode 15.0 test
@@ -106,13 +106,13 @@ func TestParse(t *testing.T) {
 	}
 }
 
-// forEachIDNATestVector parses testdata/idna_test_vectors.txt and
-// calls fn in a subtest for each test vector. Return the number of
-// test vectors found in the file.
+// forEachIDNATestVector parses the testdata fixture for x/net/idna's
+// Unicode version and calls fn in a subtest for each test vector.
+// Return the number of test vectors found in the file.
 func forEachIDNATestVector(t *testing.T, fn func(input, want string, wantErr bool)) (numVectorsFound int) {
 	t.Helper()
 
-	const testfile = "testdata/idna_test_vectors.txt"
+	testfile := fmt.Sprintf("testdata/idna_test_vectors_%s.txt", idna.UnicodeVersion)
 
 	// Process the file in 2 passes. This is less efficient, it's
 	// possible to stream the test file and do all this in one pass,

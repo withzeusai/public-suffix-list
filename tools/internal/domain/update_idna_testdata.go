@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	idnaTestVectorsURLPattern = "https://www.unicode.org/Public/idna/%s/IdnaTestV2.txt"
-	idnaTestVectorsPath       = "testdata/idna_test_vectors.txt"
+	idnaTestVectorsURLPattern  = "https://www.unicode.org/Public/%s/idna/IdnaTestV2.txt"
+	idnaTestVectorsPathPattern = "testdata/idna_test_vectors_%s.txt"
 )
 
 func main() {
@@ -26,6 +26,10 @@ func main() {
 	// tests, so it's very important to use the test vectors for the
 	// specific version of Unicode that x/net/idna uses.
 	url := fmt.Sprintf(idnaTestVectorsURLPattern, idna.UnicodeVersion)
+	if idna.UnicodeVersion == "15.0.0" {
+		// Unicode 15.0 data predates the version-first directory layout.
+		url = "https://www.unicode.org/Public/idna/15.0.0/IdnaTestV2.txt"
+	}
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -35,7 +39,8 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	if err := atomic.WriteFile(idnaTestVectorsPath, resp.Body); err != nil {
-		log.Fatalf("Writing %q: %v", idnaTestVectorsPath, err)
+	path := fmt.Sprintf(idnaTestVectorsPathPattern, idna.UnicodeVersion)
+	if err := atomic.WriteFile(path, resp.Body); err != nil {
+		log.Fatalf("Writing %q: %v", path, err)
 	}
 }
